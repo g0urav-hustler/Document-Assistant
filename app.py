@@ -7,19 +7,22 @@ import random
 
 st.set_page_config(layout="wide")
 
-
-# Streamed response emulator
-def response_generator():
-    response = random.choice(
+def generate_answer():
+    answer = random.choice(
         [
             "Hello there! How can I assist you today?",
             "Hi, human! Is there anything I can help you with?",
             "Do you need help?",
         ]
     )
+    return answer
+
+# Streamed response emulator
+def response_generator(response):
+    
     for word in response.split():
         yield word + " "
-        time.sleep(0.05)
+        time.sleep(0.2)
 
 def get_file_size(file):
     file.seek(0, os.SEEK_END)
@@ -73,14 +76,16 @@ def main():
             st.markdown("File Format")
             pdf_view = displayPDF(filepath)
 
-        with col2:
-            with st.spinner('Embeddings are in process...'):
+        with st.spinner('Embeddings are in process...'):
                 time.sleep(5)
                 # ingested_data = data_ingestion()
-            st.success('Embeddings are created successfully!')
-            # st.markdown("<h4 style color:black;'>Chat Here</h4>", unsafe_allow_html=True)
-            st.markdown("Chat With your document using LLama model")
+        st.success('Embeddings are created successfully!')
 
+        with col2:
+            
+            # st.markdown("<h4 style color:black;'>Chat Here</h4>", unsafe_allow_html=True)
+            st.subheader("Chat with your document using LLama Model")
+            # st.markdown("Chat With your document using LLama model")
 
             # Initialize chat history
             if "messages" not in st.session_state:
@@ -94,41 +99,21 @@ def main():
             # Accept user input
             if prompt := st.chat_input("What is up?"):
                 # Add user message to chat history
-                st.session_state.messages.append({"role": "user", "content": prompt})
-                # Display user message in chat message container
+
                 with st.chat_message("user"):
                     st.markdown(prompt)
 
-                # Display assistant response in chat message container
+                with st.spinner("finding the answer"):
+                    time.sleep(5)
+                    answer = generate_answer()
                 with st.chat_message("assistant"):
-                    response = st.write_stream(response_generator())
+                    response = st.write_stream(response_generator(answer))
+
+                st.session_state.messages.append({"role": "user", "content": prompt})
                 # Add assistant response to chat history
-                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.session_state.messages.append({"role": "assistant", "content": answer})
 
-
-
-
-
-            # # Initialize session state for generated responses and past messages
-            # if "generated" not in st.session_state:
-            #     st.session_state["generated"] = ["I am ready to help you"]
-            # if "past" not in st.session_state:
-            #     st.session_state["past"] = ["Hey there!"]
-
-
-            # user_input = st.text_input("", key="input")
-
-            # # Search the database for a response based on user input and update session state
-            # if user_input:
-            #     # answer = process_answer({'query': user_input})
-            #     answer = "Anwers for the promts "
-            #     st.session_state["past"].append(user_input)
-            #     response = answer
-            #     st.session_state["generated"].append(response)
-
-            # # Display conversation history using Streamlit messages
-            # if st.session_state["generated"]:
-            #     display_conversation(st.session_state)
+                
         
 
 
