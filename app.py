@@ -2,31 +2,38 @@ import streamlit as st
 # from streamlit_chat import message
 import time 
 import os
-import base64
 import random
-# from chromadb.config import Settings
+import base64
+import time
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM 
+from transformers import pipeline
+import torch 
+import textwrap 
+from langchain.document_loaders import PyPDFLoader, DirectoryLoader, PDFMinerLoader 
+from langchain.text_splitter import RecursiveCharacterTextSplitter 
+from langchain.embeddings import SentenceTransformerEmbeddings 
+from langchain.vectorstores import Chroma 
+from langchain.llms import HuggingFacePipeline
+from langchain.chains import RetrievalQA 
+from chromadb.config import Settings
+
+
+
 
 st.set_page_config(layout="wide")
 
-def generate_answer():
-    answer = random.choice(
-        [
-            "Hello there! How can I assist you today?",
-            "Hi, human! Is there anything I can help you with?",
-            "Do you need help?",
-        ]
-    )
-    return answer
+
+
 
 # Streamed response emulator
 def response_generator(response):
-    
     for word in response.split():
         yield word + " "
         time.sleep(0.2)
 
 MODEL_NAME = "MBZUAI/LaMini-T5-738M"
 device = "cpu"
+
 print(f"Checkpoint path: {MODEL_NAME}")  # Add this line for debugging
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 base_model = AutoModelForSeq2SeqLM.from_pretrained(
@@ -54,7 +61,7 @@ def data_ingestion():
     text_splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap = 200)
     texts = text_splitter.split_documents(documents)
     embeddings = SentenceTransformerEmbeddings(model_name = MODEL_NAME)
-    db = Croma.from_documents(texts, embeddings, ersist_directory=persist_directory, client_settings=CHROMA_SETTINGS)   
+    db = Chroma.from_documents(texts, embeddings, persist_directory=persist_directory, client_settings=CHROMA_SETTINGS)   
     db.persist()
     db=None
 
@@ -76,7 +83,7 @@ def llm_pipeline():
 @st.cache_resource
 def qa_llm():
     llm = llm_pipeline()
-    embedding = SentenceTransformersEmbeddings(model_name = MODEL_NAME)
+    embedding = SentenceTransformerEmbeddings(model_name = MODEL_NAME)
     db = Chroma(persist_directory = "data_base",embedding_function = embeddings, client_settings=CHROMA_SETTINGS )
     retriever = db.as_retriever()
     qa = RetrievalQA.from_chain_type(
@@ -94,7 +101,6 @@ def process_answer(instruction):
     generated_text = qa(instruction)
     answer = generated_text['result']
     return answer
-
 
 
 def get_file_size(file):
@@ -116,23 +122,16 @@ def displayPDF(file):
     # Displaying File
     st.markdown(pdf_display, unsafe_allow_html=True)
 
-# def display_conversation(history):
-#     for i in range(len(history["generated"])):
-#         message(history["past"][i], is_user=True, key=str(i) + "_user")
-#         message(history["generated"][i],key=str(i))
 
 def main():
     st.title("Document Assistant ")
-    # st.markdown("<h1 style='text-align: center; color: blue;'>Chat with your PDF 🦜📄 </h1>", unsafe_allow_html=True)
     
-    # st.markdown("<h2 style='text-align: center; color:red;'>Upload your PDF 👇</h2>", unsafe_allow_html=True)
-
     uploaded_file = st.file_uploader("", type=["pdf"])
 
     if uploaded_file is not None:
         file_details = {
             "Filename": uploaded_file.name,
-            "File size": get_file_size(uploaded_file)
+            "File size": str(round(get_file_size(uploaded_file),2)) + " kb"
         }
         os.makedirs("docs", exist_ok = True)
 
@@ -142,16 +141,15 @@ def main():
 
         col1, col2= st.columns([1,2])
         with col1:
-            # st.markdown("<h4 style color:black;'>File details</h4>", unsafe_allow_html=True)
             st.markdown("File Details")
             st.json(file_details)
-            # st.markdown("<h4 style color:black;'>File preview</h4>", unsafe_allow_html=True)
             st.markdown("File Format")
             pdf_view = displayPDF(filepath)
 
+        
         with st.spinner('Embeddings are in process...'):
-                time.sleep(5)
-                # ingested_data = data_ingestion()
+            time.sleep(5)
+            # ingested_data = data_ingestion()
         st.success('Embeddings are created successfully!')
 
         with col2:
@@ -163,6 +161,8 @@ def main():
             # Initialize chat history
             if "messages" not in st.session_state:
                 st.session_state.messages = []
+                st.session_state.messages.append({"role": "assistant", "content": "How can I help you Sir ?"})
+                
 
             # Display chat messages from history on app rerun
             for message in st.session_state.messages:
@@ -178,7 +178,8 @@ def main():
 
                 with st.spinner("finding the answer"):
                     time.sleep(5)
-                    answer = generate_answer()
+                    # answer = process_answer({'query': prompt})
+                    answer = random_generate_answer()
                 with st.chat_message("assistant"):
                     response = st.write_stream(response_generator(answer))
 
