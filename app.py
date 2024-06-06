@@ -4,6 +4,7 @@ import time
 import os
 import base64
 import random
+# from chromadb.config import Settings
 
 st.set_page_config(layout="wide")
 
@@ -24,15 +25,22 @@ def response_generator(response):
         yield word + " "
         time.sleep(0.2)
 
-checkpoint = "MBZUAI/LaMini-T5-738M"
-print(f"Checkpoint path: {checkpoint}")  # Add this line for debugging
-tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+MODEL_NAME = "MBZUAI/LaMini-T5-738M"
+device = "cpu"
+print(f"Checkpoint path: {MODEL_NAME}")  # Add this line for debugging
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 base_model = AutoModelForSeq2SeqLM.from_pretrained(
-    checkpoint,
+    MODEL_NAME,
     device_map=device,
     torch_dtype=torch.float32
 )
 
+ 
+CHROMA_SETTINGS = Settings(
+        chroma_db_impl='duckdb+parquet',
+        persist_directory='data_base',
+        anonymized_telemetry=False
+)
 persist_directory = "data_base"
 
 @st.cache_resource
@@ -40,22 +48,15 @@ def data_ingestion():
     for root, dirs, files in os.walk("docs"):
         for file in files:
             if file.endswith(".pdf"):
-                print(file)
-                loader = PDFMinerLoader(os.path.join(root, file))
+                loader = PDFMinerLoader(os.path.join(root,file))
+
     documents = loader.load()
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=500)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap = 200)
     texts = text_splitter.split_documents(documents)
-    #create embeddings here
-    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-    #create vector store here
-    db = Chroma.from_documents(texts, embeddings, persist_directory=persist_directory, client_settings=CHROMA_SETTINGS)
+    embeddings = SentenceTransformerEmbeddings(model_name = MODEL_NAME)
+    db = Croma.from_documents(texts, embeddings, ersist_directory=persist_directory, client_settings=CHROMA_SETTINGS)   
     db.persist()
-    db=None 
-
-
-
-
-
+    db=None
 
 
 def get_file_size(file):
