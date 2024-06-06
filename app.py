@@ -35,7 +35,22 @@ base_model = AutoModelForSeq2SeqLM.from_pretrained(
 
 persist_directory = "data_base"
 
-
+@st.cache_resource
+def data_ingestion():
+    for root, dirs, files in os.walk("docs"):
+        for file in files:
+            if file.endswith(".pdf"):
+                print(file)
+                loader = PDFMinerLoader(os.path.join(root, file))
+    documents = loader.load()
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=500)
+    texts = text_splitter.split_documents(documents)
+    #create embeddings here
+    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    #create vector store here
+    db = Chroma.from_documents(texts, embeddings, persist_directory=persist_directory, client_settings=CHROMA_SETTINGS)
+    db.persist()
+    db=None 
 
 
 
