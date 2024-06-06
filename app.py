@@ -73,6 +73,20 @@ def llm_pipeline():
     local_llm = HuggingFacePipeline(pipeline=pipe)
 
     return local_llm
+@st.cache_resource
+def qa_llm():
+    llm = llm_pipeline()
+    embedding = SentenceTransformersEmbeddings(model_name = MODEL_NAME)
+    db = Chroma(persist_directory = "data_base",embedding_function = embeddings, client_settings=CHROMA_SETTINGS )
+    retriever = db.as_retriever()
+    qa = RetrievalQA.from_chain_type(
+        llm = llm,
+        chain_type = "stuff",
+        retriever = retriever,
+        return_source_documents = True
+    )
+
+    return qa
 
 
 
