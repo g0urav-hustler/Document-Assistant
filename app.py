@@ -24,6 +24,25 @@ def response_generator(response):
         yield word + " "
         time.sleep(0.2)
 
+checkpoint = "MBZUAI/LaMini-T5-738M"
+print(f"Checkpoint path: {checkpoint}")  # Add this line for debugging
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+base_model = AutoModelForSeq2SeqLM.from_pretrained(
+    checkpoint,
+    device_map=device,
+    torch_dtype=torch.float32
+)
+
+persist_directory = "data_base"
+
+
+
+
+
+
+
+
+
 def get_file_size(file):
     file.seek(0, os.SEEK_END)
     file_size = file.tell()
@@ -112,9 +131,6 @@ def main():
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 # Add assistant response to chat history
                 st.session_state.messages.append({"role": "assistant", "content": answer})
-
-                
-        
 
 
 if __name__ == "__main__":
