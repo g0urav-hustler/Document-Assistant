@@ -58,6 +58,23 @@ def data_ingestion():
     db.persist()
     db=None
 
+@st.cache_resource
+def llm_pipeline():
+    pipe = pipeline(
+        "text2text-generation",
+        model= base_model,
+        tokenizer = tokenizer,
+        max_length = 256,
+        do_sample = True,
+        temperature = 0.3,
+        top_p = 0.95,
+        device = device
+    )
+    local_llm = HuggingFacePipeline(pipeline=pipe)
+
+    return local_llm
+
+
 
 def get_file_size(file):
     file.seek(0, os.SEEK_END)
