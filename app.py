@@ -88,6 +88,13 @@ def qa_llm():
 
     return qa
 
+def process_answer(instruction):
+    instruction = instruction
+    qa = qa_llm()
+    generated_text = qa(instruction)
+    answer = generated_text['result']
+    return answer
+
 
 
 def get_file_size(file):
