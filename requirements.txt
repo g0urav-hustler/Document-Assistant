@@ -1,4 +1,5 @@
 langchain
+langchain-community
 chromadb
 streamlit
 transformers 
@@ -10,7 +11,7 @@ pdfminer.six
 bs4 
 sentence_transformers
 duckdb 
-beautifulsoup4 
+beautifulsoup4
 sentence-transformers 
 sentencepiece 
 six 
