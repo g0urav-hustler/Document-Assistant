@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install required Python packages
-RUN pip install -r requirements.txt --default-timeout=100 future
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Copy the rest of the application files to the container's working directory
 COPY . .

@@ -60,7 +60,7 @@ def data_ingestion():
     documents = loader.load()
     text_splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap = 200)
     texts = text_splitter.split_documents(documents)
-    embeddings = SentenceTransformerEmbeddings(model_name = MODEL_NAME)
+    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
     db = Chroma.from_documents(texts, embeddings, persist_directory=persist_directory, client_settings=CHROMA_SETTINGS)   
     db.persist()
     db=None
