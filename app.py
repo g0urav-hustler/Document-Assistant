@@ -83,7 +83,7 @@ def llm_pipeline():
 @st.cache_resource
 def qa_llm():
     llm = llm_pipeline()
-    embedding = SentenceTransformerEmbeddings(model_name = MODEL_NAME)
+    embeddings = SentenceTransformerEmbeddings(model_name = MODEL_NAME)
     db = Chroma(persist_directory = "data_base",embedding_function = embeddings, client_settings=CHROMA_SETTINGS )
     retriever = db.as_retriever()
     qa = RetrievalQA.from_chain_type(
@@ -149,14 +149,13 @@ def main():
         
         with st.spinner('Embeddings are in process...'):
             time.sleep(5)
-            # ingested_data = data_ingestion()
+            ingested_data = data_ingestion()
         st.success('Embeddings are created successfully!')
 
         with col2:
             
-            # st.markdown("<h4 style color:black;'>Chat Here</h4>", unsafe_allow_html=True)
             st.subheader("Chat with your document using LLama Model")
-            # st.markdown("Chat With your document using LLama model")
+            
 
             # Initialize chat history
             if "messages" not in st.session_state:
@@ -178,8 +177,8 @@ def main():
 
                 with st.spinner("finding the answer"):
                     time.sleep(5)
-                    # answer = process_answer({'query': prompt})
-                    answer = random_generate_answer()
+                    answer = process_answer({'query': prompt})
+                    # answer = random_generate_answer()
                 with st.chat_message("assistant"):
                     response = st.write_stream(response_generator(answer))
 
