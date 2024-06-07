@@ -33,9 +33,8 @@ print(f"Checkpoint path: {MODEL_NAME}")  # Add this line for debugging
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 base_model = AutoModelForSeq2SeqLM.from_pretrained(
     MODEL_NAME,
-    device_map=device,
     torch_dtype=torch.float32
-)
+).to(device)
 
  
 CHROMA_SETTINGS = Settings(
