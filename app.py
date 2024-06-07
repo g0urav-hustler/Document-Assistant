@@ -2,23 +2,18 @@ import streamlit as st
 # from streamlit_chat import message
 import time 
 import os
-import random
 import base64
 import time
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM 
 from transformers import pipeline
 import torch 
-import textwrap 
-from langchain.document_loaders import PyPDFLoader, DirectoryLoader, PDFMinerLoader 
+from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader, PDFMinerLoader 
 from langchain.text_splitter import RecursiveCharacterTextSplitter 
-from langchain.embeddings import SentenceTransformerEmbeddings 
-from langchain.vectorstores import Chroma 
-from langchain.llms import HuggingFacePipeline
+from langchain_community.embeddings import SentenceTransformerEmbeddings 
+from langchain_community.vectorstores import Chroma 
+from langchain_community.llms import HuggingFacePipeline
 from langchain.chains import RetrievalQA 
 from chromadb.config import Settings
-
-
-
 
 st.set_page_config(layout="wide")
 
