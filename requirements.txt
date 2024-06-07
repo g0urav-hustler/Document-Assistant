@@ -1,6 +1,7 @@
 langchain
 langchain-community
 chromadb
+chroma-migrate
 streamlit
 transformers 
 torch 
