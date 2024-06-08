@@ -27,7 +27,8 @@ def response_generator(response):
         time.sleep(0.2)
 
 MODEL_NAME = "MBZUAI/LaMini-T5-738M"
-device = "cpu"
+device = "gpu" if torch.cuda.is_available() else "cpu"
+print("Running on :::", device)
 
 print(f"Checkpoint path: {MODEL_NAME}")  # Add this line for debugging
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
