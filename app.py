@@ -1,5 +1,4 @@
 import streamlit as st
-# from streamlit_chat import message
 import time 
 import os
 import base64
@@ -15,9 +14,7 @@ from langchain_community.llms import HuggingFacePipeline
 from langchain.chains import RetrievalQA 
 from chromadb.config import Settings
 
-st.set_page_config(layout="wide")
-
-
+st.set_page_config(page_title="Document Assistant",layout="wide")
 
 
 # Streamed response emulator
@@ -30,12 +27,15 @@ MODEL_NAME = "MBZUAI/LaMini-T5-738M"
 device = "gpu" if torch.cuda.is_available() else "cpu"
 print("Running on :::", device)
 
-print(f"Checkpoint path: {MODEL_NAME}")  # Add this line for debugging
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-base_model = AutoModelForSeq2SeqLM.from_pretrained(
-    MODEL_NAME,
-    torch_dtype=torch.float32
-).to(device)
+# print(f"Checkpoint path: {MODEL_NAME}")  # Add this line for debugging
+
+
+with st.spinner("Loading the app.."):
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    base_model = AutoModelForSeq2SeqLM.from_pretrained(
+        MODEL_NAME,
+        torch_dtype=torch.float32
+    ).to(device)
 
  
 CHROMA_SETTINGS = Settings(
@@ -104,8 +104,8 @@ def get_file_size(file):
     file.seek(0)
     return file_size
 
-@st.cache_data
 #function to display the PDF of a given file 
+@st.cache_data
 def displayPDF(file):
     # Opening file from file path
     with open(file, "rb") as f:
@@ -143,15 +143,16 @@ def main():
 
         
         with st.spinner('Embeddings are in process...'):
-            time.sleep(5)
-            ingested_data = data_ingestion()
+            try:
+                ingested_data = data_ingestion()
+            except Exception as e:
+                raise e
         st.success('Embeddings are created successfully!')
 
         with col2:
             
             st.subheader("Chat with your document using LLama Model")
             
-
             # Initialize chat history
             if "messages" not in st.session_state:
                 st.session_state.messages = []
@@ -173,9 +174,8 @@ def main():
                 with st.spinner("finding the answer"):
                     time.sleep(5)
                     answer = process_answer({'query': prompt})
-                    # answer = random_generate_answer()
                 with st.chat_message("assistant"):
-                    response = st.write_stream(response_generator(answer))
+                    st.write_stream(response_generator(answer))
 
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 # Add assistant response to chat history
