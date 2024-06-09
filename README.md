@@ -1,6 +1,6 @@
 ---
 title: Document Assistant
-emoji: 🤗
+emoji: 📄
 colorFrom: blue
 colorTo: yellow
 sdk: streamlit
