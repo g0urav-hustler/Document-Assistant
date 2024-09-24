@@ -32,7 +32,7 @@ license: mit
  
 **Website Url-** https://huggingface.co/spaces/g0urav-hustler/Document-Assistant
 
- 
+ **Note** - For some server error, if site is down you can check the screenshot uploaded.
 
 ## Overview
 
